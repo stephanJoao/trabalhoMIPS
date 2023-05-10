@@ -9,8 +9,19 @@
 	.main:	
 		jal imprime_hello_world
 		
+	troca:
+		beq $a0, $a1, $ra
+		lw $t0, 0($a0)
+		lw $t1, 0($a1)
+		sw $t0, 0($a1)
+		sw $t1, 0($a0)
+		jr $ra
+	
 	imprime_hello_world:
 		li $v0, 4 # instrução para impressão de String
 		la $a0, msg # indicar o endereço que está a mensagem
+
+		jal troca
+		
 		syscall
 	
