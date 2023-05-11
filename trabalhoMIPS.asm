@@ -1,61 +1,109 @@
 .data
 	# área para dados na memória principal
+	
 	msg: .asciiz "Olá mundo!" # mensagem a ser exibida para o usuário
 	size: .word 20
 
 .text
 	# área para instruções do programa
 	
-	# aqui se implementa o código principal	
+	# código principal	
 	.main:	
 		move $s0, $sp # guarda o endereço do vetor
 		lw $t0, size # carrega em $t0 tamanho do vetor
 		sll $t0, $t0, 2 # multiplica por 4
-		add $sp, $sp, $t0 # soma tamanho do vetor em bytes no $sp
+		sub $sp, $sp, $t0 # espaço do tamanho do vetor no $sp
+		
+		move $a0, $s0 # prepara argumento com endereço do vetor
+		move $a1, $s0
+		add $a1, $a1, $t0 # prepara argumento com endereço final do vetor
+		jal zeraVetor # chama função que zera vetor
+		
+	
+		move $a0, $s0 # prepara argumento com endereço do vetor
+		lw $a1, size # prepara argumento com tamanho do vetor
+		jal imprimeVetor # chama função que imprime vetor
 		
 		move $a0, $s0
-		lw $a1, size 
-		jal zeraVetor
-		move $a0, $s0
-		jal imprimeVetor
+		addi $a0, $a0, 4
+		addi $a1, $a0, 8
+		jal troca
+		
+		move $a0, $s0 # prepara argumento com endereço do vetor
+		lw $a1, size # prepara argumento com tamanho do vetor
+		jal imprimeVetor # chama função que imprime vetor
+		
+		
+		li $a0, 1
+		li $a1, 2
+		li $a2, 3
+		li $a3, 4
+		sub $sp, $sp, 4
+		sw $a0, 0($sp)
+		jal valorAleatorio
+		move $t0, $v0
+		
+		li $v0, 1 # prepara syscall para imprimir inteiro
+		move $a0, $t0 # prepara argumento do syscall para valor do vetor
+		syscall
 		
 		# fim do programa
 		li $v0, 10  # syscall pra finalizar o programa
 		syscall     # finaliza o programa
 	
+	
+	# função que zera o vetor
 	zeraVetor:
 		move $t0, $a0 # temporário com endereço do vetor que será iterado
-		move $t1, $a1 # temporário com tamanho do vetor
-		move $t2, $zero 
-		li $t3, 1
+		move $t1, $a1 # temporário com endereço final do vetor
+		li $t2, 0
 	loopZera:
-		bge $t2, $t1, endZera # condição do loop
-		sw $t3, 0($t0)
-		addi $t0, $t0, 4
-		addi $t2, $t2, 1		
+		addi $t2, $t2, 1
+		bge $t0, $t1, endZera # condição do loop
+		sw $t2, 0($t0) # armazena no vetor valor de $t2
+		addi $t0, $t0, 4 # incrementa endereço	
 		j loopZera
 	endZera:
 		jr $ra
 				
+	
+	# função que imprime o vetor			
 	imprimeVetor:
 		move $t0, $a0 # temporário com endereço do vetor que será iterado
 		move $t1, $a1 # temporário com tamanho do vetor
-		move $t2, $zero # int i = 0
+		move $t2, $zero # contador
 	loopImprime:
 		bge $t2, $t1, endImprime # condição do loop
-		lw $t3, 0($t0)
-		li $v0, 1
-		move $a0, $t3
+		lw $t3, 0($t0) # carrega para o temporário o valor do vetor
+		li $v0, 1 # prepara syscall para imprimir inteiro
+		move $a0, $t3 # prepara argumento do syscall para valor do vetor
 		syscall
-		li $a0, 32               # Load the ASCII code for space into register $a0
-    		li $v0, 11               # Load the system call code for printing a character into $v0
+    		li $v0, 11 # prepara syscall pra imprimir caractere
+		li $a0, 32 # carrega o código ASCII para " "
     		syscall 
-		addi $t0, $t0, 4
-		addi $t2, $t2, 1		
+		addi $t0, $t0, 4 # incrementa endereço
+		addi $t2, $t2, 1 # incrementa contador		
 		j loopImprime
 	endImprime:
+		li $v0, 11 # prepara syscall pra imprimir caractere
+		li $a0, 10 # carrega o código ASCII para "\n"
+    		syscall 
 		jr $ra
-						
+		
+		
+	# função que gera valor pseudo-aleatorio
+	valorAleatorio:
+		lw $t0, 0($sp)
+		add $sp, $sp, 4
+		mul $t1, $a0, $a1
+		add $t1, $t1, $a2
+		div $t1, $a3
+		mfhi $t1
+		sub $v0, $t1, $t0
+		jr $ra 
+		
+		
+	#função que troca valores dos endereço recebidos								
 	troca:
 		beq $a0, $a1, endTroca
 		lw $t0, 0($a0)
@@ -64,6 +112,7 @@
 		sw $t1, 0($a0)
 	endTroca:
 		jr $ra
+	
 	
 	imprime_hello_world:
 		li $v0, 4 # instrução para impressão de String
