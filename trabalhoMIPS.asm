@@ -93,7 +93,7 @@
 		
 	# função que gera valor pseudo-aleatorio
 	valorAleatorio:
-		lw $t0, 0($sp)
+		lw $t0, 0($sp) # obtem quinto parâmetro
 		add $sp, $sp, 4
 		mul $t1, $a0, $a1
 		add $t1, $t1, $a2
@@ -101,6 +101,31 @@
 		mfhi $t1
 		sub $v0, $t1, $t0
 		jr $ra 
+		
+	
+	# função que inicializa o vetor recursivamente com valores aleatorios
+	inicializaVetor:
+		bgt $a1, $zero, elseInicializa
+		move $v0, $zero
+		jr $ra
+	elseInicializa:
+		# salva valores de argumentos
+		sub $sp, $sp, 12		
+		sw $a0, 0($sp)
+		sw $a1, 4($sp)
+		sw $a2, 8($sp)
+		# prepara argumentos para função de número aleatório
+		li $a0, $a2
+		li $a1, 47
+		li $a2, 97
+		li $a3, 337
+		li $t0, 3
+		sub $sp, $sp, 4
+		sw $t0, 0($sp)
+		jal valorAleatorio
+		move $t0, $a1
+		subi $t0, $t0, 4
+		
 		
 		
 	#função que troca valores dos endereço recebidos								
