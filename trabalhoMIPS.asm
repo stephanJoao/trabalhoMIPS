@@ -14,38 +14,44 @@
 		sll $t0, $t0, 2 # multiplica por 4
 		sub $sp, $sp, $t0 # espaço do tamanho do vetor no $sp
 		
-		move $a0, $s0 # prepara argumento com endereço do vetor
-		move $a1, $s0
-		add $a1, $a1, $t0 # prepara argumento com endereço final do vetor
-		jal zeraVetor # chama função que zera vetor
+		# inicializa vetor
+		move $a0, $s0
+		lw $a1, size
+		li $a2, 71
+		jal inicializaVetor
+		
+		#move $a0, $s0 # prepara argumento com endereço do vetor
+		#move $a1, $s0
+		#add $a1, $a1, $t0 # prepara argumento com endereço final do vetor
+		#jal zeraVetor # chama função que zera vetor
 		
 	
+		#move $a0, $s0 # prepara argumento com endereço do vetor
+		#lw $a1, size # prepara argumento com tamanho do vetor
+		#jal imprimeVetor # chama função que imprime vetor
+		
+		#move $a0, $s0
+		#addi $a0, $a0, 4
+		#addi $a1, $a0, 8
+		#jal troca
+		
 		move $a0, $s0 # prepara argumento com endereço do vetor
 		lw $a1, size # prepara argumento com tamanho do vetor
 		jal imprimeVetor # chama função que imprime vetor
 		
-		move $a0, $s0
-		addi $a0, $a0, 4
-		addi $a1, $a0, 8
-		jal troca
 		
-		move $a0, $s0 # prepara argumento com endereço do vetor
-		lw $a1, size # prepara argumento com tamanho do vetor
-		jal imprimeVetor # chama função que imprime vetor
+		#li $a0, 1
+		#li $a1, 2
+		#li $a2, 3
+		#li $a3, 4
+		#sub $sp, $sp, 4
+		#sw $a0, 0($sp)
+		#jal valorAleatorio
+		#move $t0, $v0
 		
-		
-		li $a0, 1
-		li $a1, 2
-		li $a2, 3
-		li $a3, 4
-		sub $sp, $sp, 4
-		sw $a0, 0($sp)
-		jal valorAleatorio
-		move $t0, $v0
-		
-		li $v0, 1 # prepara syscall para imprimir inteiro
-		move $a0, $t0 # prepara argumento do syscall para valor do vetor
-		syscall
+		#li $v0, 1 # prepara syscall para imprimir inteiro
+		#move $a0, $t0 # prepara argumento do syscall para valor do vetor
+		#syscall
 		
 		# fim do programa
 		li $v0, 10  # syscall pra finalizar o programa
@@ -105,17 +111,19 @@
 	
 	# função que inicializa o vetor recursivamente com valores aleatorios
 	inicializaVetor:
-		bgt $a1, $zero, elseInicializa
+		bgt $a1, $zero, elseInicializa # verifica o caso base (não há vetor)
 		move $v0, $zero
 		jr $ra
 	elseInicializa:
 		# salva valores de argumentos
-		sub $sp, $sp, 12		
-		sw $a0, 0($sp)
-		sw $a1, 4($sp)
-		sw $a2, 8($sp)
+		sub $sp, $sp, 16		
+		sw $a0, 0($sp) # guarda endereço vetor
+		sw $a1, 4($sp) # guarda tamanho do vetor
+		sw $ra, 8($sp) # guarda retorno da função
+		sw $s0, 12($sp) # guarda registrador s0
+		move $s0, $a1 # guarda tamanho do vetor
 		# prepara argumentos para função de número aleatório
-		li $a0, $a2
+		move $a0, $a2
 		li $a1, 47
 		li $a2, 97
 		li $a3, 337
@@ -123,8 +131,25 @@
 		sub $sp, $sp, 4
 		sw $t0, 0($sp)
 		jal valorAleatorio
-		move $t0, $a1
-		subi $t0, $t0, 4
+		lw $t0, 0($sp)
+		lw $t1, 4($sp)
+		sll $t1, $t1, 2
+		subi $t1, $t1, 4
+		add $t0, $t0, $t1
+		sw $v0, 0($t0) # guarda valor aleatório na última posição
+		subi $s0, $s0, 1
+		# prepara argumentos para chamada recursiva
+		lw $a0, 0($sp)
+		move $a1, $s0
+		move $a2, $v0
+		move $s0, $v0 # salva valor de retorno
+		jal inicializaVetor
+		add $v0, $s0, $v0
+		# restaura valores e $sp
+		lw $ra, 8($sp)
+		lw $s0, 12($sp)
+		add $sp, $sp, 16
+		jr $ra
 		
 		
 		
