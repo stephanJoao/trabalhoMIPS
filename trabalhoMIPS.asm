@@ -1,7 +1,7 @@
 .data
 	# área para dados na memória principal
 	
-	msg: .asciiz "Olá mundo!" # mensagem a ser exibida para o usuário
+	msg: .asciiz "Soma: " # mensagem de soma
 	size: .word 20
 
 .text
@@ -19,6 +19,7 @@
 		lw $a1, size
 		li $a2, 71
 		jal inicializaVetor
+		move $s1, $v0
 		
 		#move $a0, $s0 # prepara argumento com endereço do vetor
 		#move $a1, $s0
@@ -52,6 +53,14 @@
 		#li $v0, 1 # prepara syscall para imprimir inteiro
 		#move $a0, $t0 # prepara argumento do syscall para valor do vetor
 		#syscall
+		
+		li $v0, 4 # instrução para impressão de String
+		la $a0, msg # indicar o endereço que está a mensagem	
+		syscall
+		
+		li $v0, 1 # prepara syscall para imprimir inteiro
+		move $a0, $s1 # prepara argumento do syscall para valor do vetor
+		syscall
 		
 		# fim do programa
 		li $v0, 10  # syscall pra finalizar o programa
