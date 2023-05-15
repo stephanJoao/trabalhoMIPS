@@ -40,6 +40,14 @@
 		lw $a1, size # prepara argumento com tamanho do vetor
 		jal imprimeVetor # chama função que imprime vetor
 		
+		move $a0, $s0
+		lw $a1, size
+		jal ordenaVetor
+		
+		move $a0, $s0 # prepara argumento com endereço do vetor
+		lw $a1, size # prepara argumento com tamanho do vetor
+		jal imprimeVetor # chama função que imprime vetor
+		
 		
 		#li $a0, 1
 		#li $a1, 2
@@ -67,7 +75,7 @@
 		syscall     # finaliza o programa
 	
 	
-	# função que zera o vetor
+	# função para zerar o vetor
 	zeraVetor:
 		move $t0, $a0 # temporário com endereço do vetor que será iterado
 		move $t1, $a1 # temporário com endereço final do vetor
@@ -82,7 +90,7 @@
 		jr $ra
 				
 	
-	# função que imprime o vetor			
+	# função para imprimir o vetor			
 	imprimeVetor:
 		move $t0, $a0 # temporário com endereço do vetor que será iterado
 		move $t1, $a1 # temporário com tamanho do vetor
@@ -106,7 +114,7 @@
 		jr $ra
 		
 		
-	# função que gera valor pseudo-aleatorio
+	# gerador de números pseudo-aleatórios por congruência linear
 	valorAleatorio:
 		lw $t0, 0($sp) # obtem quinto parâmetro
 		add $sp, $sp, 4
@@ -118,7 +126,7 @@
 		jr $ra 
 		
 	
-	# função que inicializa o vetor recursivamente com valores aleatorios
+	# função recursiva que inicializa o vetor com valores pseudo-aleatórios
 	inicializaVetor:
 		bgt $a1, $zero, elseInicializa # verifica o caso base (não há vetor)
 		move $v0, $zero
@@ -161,8 +169,7 @@
 		jr $ra
 		
 		
-		
-	#função que troca valores dos endereço recebidos								
+	# função que troca os valores entre duas posições do vetor
 	troca:
 		beq $a0, $a1, endTroca
 		lw $t0, 0($a0)
@@ -173,10 +180,62 @@
 		jr $ra
 	
 	
-	imprime_hello_world:
-		li $v0, 4 # instrução para impressão de String
-		la $a0, msg # indicar o endereço que está a mensagem	
-		syscall
+	# função que ordena os elementos do vetor (SelectionSort)
+	ordenaVetor:
+		# salva valores de argumentos
+		sub $sp, $sp, 20		
+		sw $a0, 0($sp) # guarda endereço vetor
+		sw $a1, 4($sp) # guarda tamanho do vetor
+		sw $ra, 8($sp) # guarda retorno da função
+		sw $s0, 12($sp) # guarda registrador s0
+		sw $s1, 16($sp) # guarda registrador s1
+		move $s0, $zero # i
+		move $s1, $a1 # tamanho do vetor (não em byte) n
+	loopOrdena1:
+		# condição loop 1
+		subi $t0, $s1, 1
+		bge $s0, $t0, endOrdena1 
+		# corpo
+		move $t1, $s0 # min_idx
+		addi $t2, $s0, 1 # j
+	loopOrdena2:
+		# condição loop 2
+		bge $t2, $s1, endOrdena2
+		# corpo
+		sll $t3, $t2, 2 # j em bytes
+		sll $t4, $t1, 2 # min_idx em bytes
+		add $t3, $t3, $a0 # j no vetor
+		add $t4, $t4, $a0 # min_idx no vetor
+		lw $t3, 0($t3) # vet[j]
+		lw $t4, 0($t4) # vet[min_idx]
+		# condição min_idx = j
+		bge $t3, $t4, elseLoopOrdena2 
+		# corpo
+		move $t1, $t2
+	elseLoopOrdena2:
+		addi $t2, $t2, 1	
+		j loopOrdena2
+	endOrdena2:
+		# condição troca
+		beq $t1, $s0, endOrdena1
+		# corpo
+		move $t5, $a0 # endereço do vetor
+		sll $a0, $t1, 2
+		add $a0, $a0, $t5
+		sll $a1, $s0, 2
+		add $a1, $a1, $t5		
+		jal troca
+		move $a0, $t5
+		addi $s0, $s0, 1
+		j loopOrdena1
+	endOrdena1:
+		# restaura valores armazenados
+		lw $ra, 8($sp)
+		lw $s0, 12($sp) # guarda registrador s0
+		lw $s1, 16($sp) # guarda registrador s1
+		add $sp, $sp, 20 
+		jr $ra
+	
 		
 	
 	
