@@ -14,61 +14,60 @@
 		sll $t0, $t0, 2 # multiplica por 4
 		sub $sp, $sp, $t0 # espaço do tamanho do vetor no $sp
 		
+		
 		# inicializa vetor
+		# preparando argumentos
 		move $a0, $s0
 		lw $a1, size
 		li $a2, 71
+		# chamando função
 		jal inicializaVetor
-		move $s1, $v0
+		move $s1, $v0 # guardando soma em $s1
 		
-		#move $a0, $s0 # prepara argumento com endereço do vetor
-		#move $a1, $s0
-		#add $a1, $a1, $t0 # prepara argumento com endereço final do vetor
-		#jal zeraVetor # chama função que zera vetor
-		
-	
-		#move $a0, $s0 # prepara argumento com endereço do vetor
-		#lw $a1, size # prepara argumento com tamanho do vetor
-		#jal imprimeVetor # chama função que imprime vetor
-		
-		#move $a0, $s0
-		#addi $a0, $a0, 4
-		#addi $a1, $a0, 8
-		#jal troca
-		
+		# imprime vetor
 		move $a0, $s0 # prepara argumento com endereço do vetor
 		lw $a1, size # prepara argumento com tamanho do vetor
 		jal imprimeVetor # chama função que imprime vetor
+				
 		
+		# ordena vetor
+		# preparando argumentos
 		move $a0, $s0
 		lw $a1, size
+		# chamando função
 		jal ordenaVetor
 		
+		# imprime vetor
 		move $a0, $s0 # prepara argumento com endereço do vetor
 		lw $a1, size # prepara argumento com tamanho do vetor
 		jal imprimeVetor # chama função que imprime vetor
 		
 		
-		#li $a0, 1
-		#li $a1, 2
-		#li $a2, 3
-		#li $a3, 4
-		#sub $sp, $sp, 4
-		#sw $a0, 0($sp)
-		#jal valorAleatorio
-		#move $t0, $v0
+		# preparando argumentos
+		move $a0, $s0 # prepara argumento com endereço do vetor
+		move $a1, $s0
+		lw $t0, size # carrega em $t0 tamanho do vetor
+		sll $t0, $t0, 2 # multiplica por 4
+		add $a1, $a1, $t0 # prepara argumento com endereço final do vetor
+		# chamando função
+		jal zeraVetor # chama função que zera vetor
 		
-		#li $v0, 1 # prepara syscall para imprimir inteiro
-		#move $a0, $t0 # prepara argumento do syscall para valor do vetor
-		#syscall
+		# imprime vetor
+		move $a0, $s0 # prepara argumento com endereço do vetor
+		lw $a1, size # prepara argumento com tamanho do vetor
+		jal imprimeVetor # chama função que imprime vetor
 		
+		
+		# imprime mensagem de soma
 		li $v0, 4 # instrução para impressão de String
 		la $a0, msg # indicar o endereço que está a mensagem	
 		syscall
-		
+
+		# imprime soma		
 		li $v0, 1 # prepara syscall para imprimir inteiro
 		move $a0, $s1 # prepara argumento do syscall para valor do vetor
 		syscall
+		
 		
 		# fim do programa
 		li $v0, 10  # syscall pra finalizar o programa
@@ -81,7 +80,6 @@
 		move $t1, $a1 # temporário com endereço final do vetor
 		li $t2, 0
 	loopZera:
-		addi $t2, $t2, 1
 		bge $t0, $t1, endZera # condição do loop
 		sw $t2, 0($t0) # armazena no vetor valor de $t2
 		addi $t0, $t0, 4 # incrementa endereço	
@@ -209,15 +207,15 @@
 		lw $t3, 0($t3) # vet[j]
 		lw $t4, 0($t4) # vet[min_idx]
 		# condição min_idx = j
-		bge $t3, $t4, elseLoopOrdena2 
+		bge $t3, $t4, elseOrdena1 
 		# corpo
 		move $t1, $t2
-	elseLoopOrdena2:
+	elseOrdena1:
 		addi $t2, $t2, 1	
 		j loopOrdena2
 	endOrdena2:
 		# condição troca
-		beq $t1, $s0, endOrdena1
+		beq $t1, $s0, elseOrdena2
 		# corpo
 		move $t5, $a0 # endereço do vetor
 		sll $a0, $t1, 2
@@ -226,6 +224,7 @@
 		add $a1, $a1, $t5		
 		jal troca
 		move $a0, $t5
+	elseOrdena2:
 		addi $s0, $s0, 1
 		j loopOrdena1
 	endOrdena1:
@@ -235,10 +234,3 @@
 		lw $s1, 16($sp) # guarda registrador s1
 		add $sp, $sp, 20 
 		jr $ra
-	
-		
-	
-	
-	
-	
-	
