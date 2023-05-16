@@ -1,3 +1,5 @@
+# Aluno: João Stephan Silva Maurício - Matrícula: 201965505B
+
 .data
 	# área para dados na memória principal
 	
