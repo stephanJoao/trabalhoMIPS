@@ -2,27 +2,27 @@
 	# área para dados na memória principal
 	
 	msg: .asciiz "Soma: " # mensagem de soma
-	size: .word 20
+	size: .word 20        # tamanho do vetor
 
 .text
 	# área para instruções do programa
 	
 	# código principal	
 	.main:	
-		move $s0, $sp # guarda o endereço do vetor
-		lw $t0, size # carrega em $t0 tamanho do vetor
-		sll $t0, $t0, 2 # multiplica por 4
-		sub $sp, $sp, $t0 # espaço do tamanho do vetor no $sp
+		move $s0, $sp     # $s0 = endereço do vetor
+		lw $s1, size      # $s1 = tamanho do vetor
+		sll $s2, $s1, 2   # $s2 = tamanho do vetor em bytes
+		sub $sp, $sp, $s2 # aloca tamanho do vetor no $sp
 		
 		
 		# inicializa vetor
 		# preparando argumentos
 		move $a0, $s0
-		lw $a1, size
+		move $a1, $s1
 		li $a2, 71
 		# chamando função
 		jal inicializaVetor
-		move $s1, $v0 # guardando soma em $s1
+		move $s3, $v0 # guardando soma em $s3
 		
 		# imprime vetor
 		move $a0, $s0 # prepara argumento com endereço do vetor
@@ -59,13 +59,13 @@
 		
 		
 		# imprime mensagem de soma
-		li $v0, 4 # instrução para impressão de String
+		li $v0, 4   # prepara syscall para imprimir string
 		la $a0, msg # indicar o endereço que está a mensagem	
 		syscall
 
 		# imprime soma		
-		li $v0, 1 # prepara syscall para imprimir inteiro
-		move $a0, $s1 # prepara argumento do syscall para valor do vetor
+		li $v0, 1     # prepara syscall para imprimir inteiro
+		move $a0, $s3 # prepara argumento do syscall para valor da soma
 		syscall
 		
 		
